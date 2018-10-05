@@ -138,3 +138,28 @@ Options:
   -b, --bootstrap          Flash boot and recovery from bootloader
 ```
 # ubuntu-touch-nexus4
+
+sudo mount / -o remount,rw 
+
+set -xe
+cd /userdata
+dd bs=1M count=6000 if=/dev/zero of=system2.img
+losetup -f --show system2.img
+dd if=/dev/loop0 of=/dev/loop2
+e2fsck -f /dev/loop2 || true
+resize2fs -f /dev/loop2
+mv system.img system.old
+mv system2.img system.img
+reboot
+
+sudo mount / -o remount,rw 
+df -h
+rm /userdata/system.old
+adduser --force-badname --system --home /nonexistent --no-create-home --quiet _apt || true
+apt-get update
+apt-get upgrade
+
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get install -y php7.1 libapache2-mod-php7.1 php7.1-cli php7.1-common php7.1-mbstring php7.1-gd php7.1-intl php7.1-xml php7.1-mysql php7.1-mcrypt php7.1-zip
+
+android-gadget-service enable ssh
